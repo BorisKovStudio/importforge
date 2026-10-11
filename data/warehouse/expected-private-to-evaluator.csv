@@ -1,0 +1,59 @@
+﻿case_id,decision,reason_code,base_unit,normalized_quantity,price_numerator_cents,price_denominator_base_units,note
+C01,ACCEPT,VALID,pcs,24,1800,12,2 коробки × 12 шт.; цена задана за коробку
+C02,ACCEPT,VALID,sheet,1500,650,500,Блоки бумаги не считаются штуками товара
+C03,ACCEPT,VALID,pcs,24,960,12,"24 бутылки, не 12000 мл продаваемого остатка"
+C04,ACCEPT,VALID,mL,2500,480,1000,2.5 л = 2500 мл; $4.80 за литр
+C05,ACCEPT,VALID,mL,30000,3200,10000,
+C06,ACCEPT,VALID,g,1250,200,1000,
+C07,ACCEPT,VALID,pcs,12,1500,6,
+C08,ACCEPT,VALID,cm,150,120,100,
+C09,ACCEPT,VALID,pcs,200,750,100,
+C10,ACCEPT,VALID,pair,24,4800,12,
+C11,ACCEPT,VALID,pcs,120,3000,60,2 коробки × 6 пачек × 10 шт.
+C12,ACCEPT,VALID,roll,3,250,1,
+C13,ACCEPT,VALID,mL,2500,900,1000,
+C14,ACCEPT,VALID,pcs,4000,4000,2000,
+C15,ACCEPT,VALID,pcs,100,2000,100,
+C16,ACCEPT,VALID,g,1500,400,500,
+C17,REJECT,FIXED_ITEM_AS_VOLUME,pcs,,,,Бутылку нельзя продавать по миллилитрам
+C18,REJECT,FIXED_ITEM_AS_MASS,pcs,,,,Фасованный пакет не развесной рис
+C19,QUARANTINE,MISSING_DENSITY,mL,,,,Для кг → мл нужна утверждённая плотность
+C20,QUARANTINE,UNREGISTERED_PAIR_CONVERSION,pcs,,,,"Нельзя предположить, что две случайные перчатки образуют пару"
+C21,QUARANTINE,UNREGISTERED_PIECE_CONVERSION,pair,,,,Неподтверждённый состав пары
+C22,REJECT,FIXED_ROLL_AS_LENGTH,roll,,,,Этот SKU продаётся только целыми рулонами
+C23,REJECT,EMPTY_CONTAINER_AS_VOLUME,pcs,,,,Объём пустого контейнера не единица остатка
+C24,REJECT,PACK_SIZE_CONFLICT,sheet,,,,"Поставщик заявил 400, справочник — 500 листов в блоке"
+C25,REJECT,PACK_SIZE_CONFLICT,pcs,,,,"Поставщик заявил 24, справочник — 12 бутылок в коробке"
+C26,QUARANTINE,UNKNOWN_PACK_CODE,pcs,,,,"Размер BIGBOX неизвестен, не брать коэффициент другого товара"
+C27,REJECT,FRACTIONAL_BASE_UNIT,pcs,,,,Половина маркера недопустима
+C28,REJECT,FRACTIONAL_PACKAGE,pcs,,,,1.5 закрытой коробки не принимать как целые коробки
+C29,REJECT,BELOW_GRANULARITY,mL,,,,Минимальная гранулярность 1 мл
+C30,REJECT,NEGATIVE_QUANTITY,g,,,,Отрицательное поступление нельзя исправлять abs()
+C31,REJECT,ZERO_RECEIPT_QUANTITY,cm,,,,Документ поступления требует количество > 0
+C32,REJECT,NONPOSITIVE_PRICE,pcs,,,,Не подставлять цену из головы
+C33,REJECT,INVALID_PRICE,pcs,,,,Не превращать free в 0 или среднюю цену
+C34,QUARANTINE,UNSUPPORTED_CURRENCY,pcs,,,,Нет разрешённого FX-курса и конвертации валют
+C35,QUARANTINE,MISSING_PRICE_BASIS,mL,,,,"Неизвестно, цена за мл, литр или канистру"
+C36,QUARANTINE,UNKNOWN_SKU,,,,,Товар отсутствует в авторитетном справочнике
+C37,QUARANTINE,MISSING_UNIT,pcs,,,,Не угадывать единицу количества
+C38,REJECT,INVALID_CALENDAR_DATE,mL,,,,30 февраля не существует
+C39,REJECT,EXPIRY_BEFORE_RECEIPT,pcs,,,,Срок годности раньше даты поступления
+C40,QUARANTINE,EXPIRED_LOT,pcs,,,,Просроченное не попадает в доступный остаток
+C41,REJECT,FUTURE_RECEIPT,g,,,,"Это журнал фактических, не плановых поступлений"
+C42,QUARANTINE,MISSING_EXPIRY,pcs,,,,Для этого SKU срок годности обязателен
+C43,QUARANTINE,AMBIGUOUS_DATE,pcs,,,,10/11 без профиля может означать разные даты
+C44,ACCEPT,NORMALIZED_DATE,pcs,100,2000,100,en-GB: DD/MM/YYYY; нормализовать в ISO
+C45,ACCEPT,NORMALIZED_LOCALE,mL,2500,480,1000,ru-RU: десятичная запятая и русская единица
+C46,ACCEPT,NORMALIZED_GROUPING,sheet,1500,130,100,"Цена $1.30 за 100 листов, а не за один"
+C47,SKIP_DUPLICATE,IDEMPOTENT_REPLAY,pcs,,,,Повтор того же source_doc_id + line_no; не удваивать остаток
+C48,ACCEPT,VALID,pcs,24,960,12,"Та же номенклатура, но другой документ — законное новое поступление"
+C49,ACCEPT,VALID,pcs,2,1800,12,"Количество поштучно, цена за коробку — независимые базы"
+C50,ACCEPT,VALID,sheet,5000,3000,2500,2 короба × 5 блоков × 500 листов
+C51,QUARANTINE,AMBIGUOUS_NUMBER,mL,,,,"1,234 без locale неоднозначно"
+C52,QUARANTINE,MISSING_DENSITY,g,,,,Нельзя переводить мёд из мл в г без справочника плотности
+C53,REJECT,ZERO_PRICE_BASIS,pcs,,,,Цена за ноль единиц не определена
+C54,QUARANTINE,SKU_NAME_CONFLICT,pcs,,,,SKU бутылки противоречит названию бумаги
+C55,ACCEPT,NORMALIZED_CURRENCY_TOKEN,pcs,24,960,12,USD указан явно; безопасно снять текстовый префикс
+C56,QUARANTINE,MISSING_LOT,pcs,,,,Для товара со сроком годности партия обязательна
+C57,QUARANTINE,UNPARSEABLE_DATE,g,,,,Не угадывать дату tomorrow
+C58,REJECT,PACK_BELONGS_OTHER_SKU,pcs,,,,"BLOCK500 относится к бумаге, не к саморезам"

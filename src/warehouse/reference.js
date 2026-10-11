@@ -2,7 +2,7 @@ import {checkProcedure} from './procedure.js';
 import { readFileSync } from 'node:fs';
 import { parse } from 'csv-parse/sync';
 import { createHash } from 'node:crypto';
-const root=new URL('../../../importforge-warehouse/',import.meta.url);
+const root=new URL('../../data/warehouse/',import.meta.url);
 export const hash=value=>createHash('sha256').update(typeof value==='string'?value:JSON.stringify(value)).digest('hex');
 export const catalog=parse(readFileSync(new URL('catalog.csv',root)),{columns:true,bom:true,skip_empty_lines:true}).map(x=>({...x,expiry_required:x.expiry_required==='True'}));
 export const packaging=parse(readFileSync(new URL('packaging.csv',root)),{columns:true,bom:true,skip_empty_lines:true});

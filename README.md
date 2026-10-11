@@ -107,3 +107,9 @@ The deployment mode `PUBLIC_DEMO_READ_ONLY=true` requires one exact `PUBLIC_ORIG
 Every non-GET/HEAD request is denied before application routes, including generation, resume, continue, cancel, replay and reconcile. The UI closes these actions. Atlas proof, version history, recorded decisions and synthetic CSV downloads remain available. API reads are bounded to120 requests per minute per process. The cloud viewer has no model credential and creates no independent spending ledger. The budget shown is an explicitly dated record from the local operator ledger, not real-time Azure billing.
 
 Hosting uses the authorized FreeF1/LinuxFree plan without Always On, autoscaling, custom certificates or new monitoring services. A separate$10 monthly Azure hosting budget is an alert, not a hard spending stop. The existing model cap$200 is unchanged. Atlas runtime credentials are reused, not regenerated; their authorized expiry is October18,2026,15:00PDT. Network access adds only the current App Service outbound IPs as individual temporary/32 entries. The existing database role is scoped readWrite on `importforge`/Cluster0; this viewer never uses write routes. No public operator authentication or new database user is claimed.
+
+### Portable deployment data
+
+`data/warehouse/` contains the four immutable synthetic reference/regression CSVs required by the runtime and tests. They are loaded relative to this repository, never a sibling workspace. `expected-private-to-evaluator.csv` means synthetic oracle answers are not offered to importer tools; it is not customer data or a secret. Relocating the unchanged files preserves the Atlas reference hash.
+
+The deployed Node runtime uses the standard Oryx manifest and gzip dependency bundle with `compressedNodeModulesFile="node_modules.tar.gz"`. Remote build is disabled for this prebuilt artifact; startup is `npm start`, with platform port8080. Never package `.env`, `state`, CLI caches or secrets.
