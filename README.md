@@ -41,7 +41,7 @@ At publication:18 warehouse runs,13 verified completions,5 failed/stopped runs,1
 - A model-generated plan is materialized into files by code; the model does not independently write arbitrary files or bypass the validator.
 - Persistent procedure loading is not the same as continuing one unfinished task. Restart evidence covers a safe checkpoint, not an ambiguous in-flight model request, hours of autonomous work or billion-token memory.
 - Controls, bounded tasks and synthetic trials are useful evidence, not production accuracy claims.
-- A GitHub repository is **not a hosted demo**. The current server deliberately binds to localhost and rejects other hosts/origins. Cloud/public execution has not been enabled by this publication.
+- A GitHub repository is **not a hosted demo**. The current server deliberately binds to localhost and rejects other hosts/origins. A separately configured read-only Azure viewer is supported; public model calls and mutations are blocked server-side.
 
 ## Run locally
 
@@ -67,7 +67,7 @@ Set `MONGODB_URI` and the exact `MONGODB_EXPECTED_HOST` for your authorized Sand
 - `state/api-budget.sqlite` is private durable state, excluded from Git. **Do not delete it or start independent copies with the same billing credentials:** separate ledgers would not provide one shared cap.
 - The hackathon build stops new model calls after **October11,2026,17:00 America/Los_Angeles**. Historical evidence remains readable. This cutoff is intentional; changing it requires an explicit separate spending decision.
 - Maximum7 model requests,12 tool executions and2 proposals per task. No automatic ambiguous-request retry. CSRF, exact host/origin checks and verified Atlas host/TLS are retained.
-- Public write/model endpoints are not safe to expose merely by changing the bind address. A cloud release needs a separately authorized deployment, viewer/operator access separation, rate/concurrency protection, persistent shared spend controls and a connectivity check.
+- Public write/model endpoints are not safe to expose merely by changing the bind address. The authorized Azure viewer uses exact HTTPS-host validation, read-only GET/HEAD enforcement, a bounded read-request rate and a recorded budget snapshot. It receives no Azure model key and cannot reserve spending. A future public operator mode requires separate authentication and a shared durable spend ledger.
 
 ## Architecture
 
@@ -96,6 +96,14 @@ Source map:
 
 ## Verification
 
-46 automated tests cover budget reservations/restarts, domain validation, regressions, bounded procedures, checkpoint identity, memory provenance and evidence classification. UI checked at1710px and390px, with keyboard disclosures and reduced-motion CSS. Before publication, an independent read-only hash comparison confirmed all existing Atlas documents,18 warehouse runs,1315 receipts,activev11 and the spending ledger unchanged; publishing made no model calls.
+51 automated tests cover budget reservations/restarts, domain validation, regressions, bounded procedures, checkpoint identity, memory provenance and evidence classification. UI checked at1710px and390px, with keyboard disclosures and reduced-motion CSS. Before publication, an independent read-only hash comparison confirmed all existing Atlas documents,18 warehouse runs,1315 receipts,activev11 and the spending ledger unchanged; publishing made no model calls.
 
 No credentials, private database exports, runtime ledger, CLI token stores or internal project-management history are included. No hackathon submission is performed by this repository.
+
+## Authorized read-only Azure viewer
+
+The deployment mode `PUBLIC_DEMO_READ_ONLY=true` requires one exact `PUBLIC_ORIGIN` under Azure App Service and a validated `BUDGET_VIEW_JSON` snapshot with its `recordedAt` timestamp. On Azure, startup fails unless read-only mode is explicit. The viewer binds to the platform port; the default local operator remains loopback-only.
+
+Every non-GET/HEAD request is denied before application routes, including generation, resume, continue, cancel, replay and reconcile. The UI closes these actions. Atlas proof, version history, recorded decisions and synthetic CSV downloads remain available. API reads are bounded to120 requests per minute per process. The cloud viewer has no model credential and creates no independent spending ledger. The budget shown is an explicitly dated record from the local operator ledger, not real-time Azure billing.
+
+Hosting uses the authorized FreeF1/LinuxFree plan without Always On, autoscaling, custom certificates or new monitoring services. A separate$10 monthly Azure hosting budget is an alert, not a hard spending stop. The existing model cap$200 is unchanged. Atlas runtime credentials are reused, not regenerated; their authorized expiry is October18,2026,15:00PDT. Network access adds only the current App Service outbound IPs as individual temporary/32 entries. The existing database role is scoped readWrite on `importforge`/Cluster0; this viewer never uses write routes. No public operator authentication or new database user is claimed.

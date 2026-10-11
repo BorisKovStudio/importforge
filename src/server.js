@@ -1,4 +1,5 @@
 import express from 'express';
+import {deploymentPolicy,readOnlyBudget,viewerGuard} from './deployment.js';
 import { MongoClient } from 'mongodb';
 import { randomUUID,randomBytes } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
@@ -8,7 +9,8 @@ import { propose } from './model.js';
 import { firstImprovement } from './evidence.js';
 import { mountWarehouse } from './warehouse/workflow.js';
 const app=express(),port=Number(process.env.PORT||4317),csrf=randomBytes(32).toString('hex');
-const budget=new Budget(fileURLToPath(new URL('../state/api-budget.sqlite',import.meta.url)));
+const deployment=deploymentPolicy(process.env,port);
+const budget=deployment.readOnly?readOnlyBudget(process.env.BUDGET_VIEW_JSON):new Budget(fileURLToPath(new URL('../state/api-budget.sqlite',import.meta.url)));
 const uri=process.env.MONGODB_URI;
 const expectedHost=process.env.MONGODB_EXPECTED_HOST;
 let atlasReady=false,mongo=null;
@@ -21,8 +23,8 @@ if(uri) try {
 } catch { /* Invalid or unverified connection strings fail closed. */ }
 let busy=false;
 app.disable('x-powered-by');
+app.use(viewerGuard(deployment));
 app.use((req,res,next)=>{
- if(!['127.0.0.1:'+port,'localhost:'+port].includes(req.headers.host)) return res.status(403).end();
  res.set({'Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'",'X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Cache-Control':'no-store'});
  next();
 });
@@ -30,7 +32,7 @@ app.use(express.json({limit:'8kb'}));
 app.use((req,res,next)=>{
  if(req.method==='POST'&&(req.headers['x-csrf-token']!==csrf || ![`http://127.0.0.1:${port}`,`http://localhost:${port}`].includes(req.headers.origin))) return res.status(403).json({error:'Request rejected.'});next();
 });
-app.get('/api/status',(req,res)=>res.json({csrf,model:'GPT-6 Astra',deployment:'importforge-astra',azureReady:process.env.AZURE_KEYS_ROTATED==='true'&&Boolean(process.env.AZURE_OPENAI_API_KEY),atlasReady,budget:budget.status(),fixtures,localOnly:true}));
+app.get('/api/status',(req,res)=>res.json({csrf:deployment.readOnly?null:csrf,readOnly:deployment.readOnly,model:'GPT-6 Astra',deployment:'importforge-astra',azureReady:!deployment.readOnly&&process.env.AZURE_KEYS_ROTATED==='true'&&Boolean(process.env.AZURE_OPENAI_API_KEY),atlasReady,budget:budget.status(),fixtures,localOnly:!deployment.readOnly}));
 app.get('/api/first-improvement',async(req,res)=>{
  if(!mongo) return res.status(503).json({error:'Atlas не настроен. Исторический результат не загружен.'});
  try {
@@ -87,4 +89,5 @@ app.post('/api/run',async(req,res)=>{
 mountWarehouse(app,{mongo,budget,getBusy:()=>busy,setBusy:value=>{busy=value;}});
 app.use(express.static(fileURLToPath(new URL('../public/',import.meta.url))));
 app.use((error,req,res,next)=>res.status(400).json({error:'Invalid request.'}));
-app.listen(port,'127.0.0.1',()=>console.log(`ImportForge local-only: http://127.0.0.1:${port}`));
+app.get('/healthz',(req,res)=>res.json({status:'up',mode:deployment.readOnly?'READ_ONLY_PUBLIC_VIEWER':'LOCAL_OPERATOR'}));
+app.listen(port,deployment.host,()=>console.log(`ImportForge ${deployment.readOnly?'read-only public viewer':'local-only'} listening on port ${port}`));
