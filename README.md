@@ -4,6 +4,8 @@
 
 Built for the MongoDB × Cerebral Valley SF Tech Week hackathon on October 11, 2026. Uses the event-provided Atlas Sandbox and Azure-hosted model inference. All trial data is synthetic.
 
+**Public demo:** [Import workspace](https://importforge-demo-894fcf.azurewebsites.net/) · [Learning history](https://importforge-demo-894fcf.azurewebsites.net/history.html). Read-only recorded execution, with live Atlas readback; public AI calls are closed.
+
 ![Learning history: recursive improvement, self-editing harness and durable memory](docs/learning-history.png)
 
 ## What it does
@@ -41,7 +43,7 @@ At publication:18 warehouse runs,13 verified completions,5 failed/stopped runs,1
 - A model-generated plan is materialized into files by code; the model does not independently write arbitrary files or bypass the validator.
 - Persistent procedure loading is not the same as continuing one unfinished task. Restart evidence covers a safe checkpoint, not an ambiguous in-flight model request, hours of autonomous work or billion-token memory.
 - Controls, bounded tasks and synthetic trials are useful evidence, not production accuracy claims.
-- A GitHub repository is **not a hosted demo**. The current server deliberately binds to localhost and rejects other hosts/origins. A separately configured read-only Azure viewer is supported; public model calls and mutations are blocked server-side.
+- A GitHub repository is **not a hosted demo**. The default local operator binds to localhost and rejects other hosts/origins. The deployed Azure viewer is explicitly read-only; public model calls and mutations are blocked server-side.
 
 ## Run locally
 
@@ -57,7 +59,7 @@ npm start
 
 Open http://127.0.0.1:4317/ and http://127.0.0.1:4317/history.html.
 
-Configure `AZURE_OPENAI_ENDPOINT` to your existing Azure `/openai/v1/` endpoint. This hackathon build calls deployment `importforge-astra` through the official OpenAI SDK Responses API. Set `AZURE_KEYS_ROTATED=true` only after confirming the existing credential configuration. No key creation is required by this repository. The public source replaces the developer's resource-specific endpoint with environment configuration; inference logic is otherwise unchanged. The publication snapshot also pins `csv-parse`7.0.3 to address GHSA-8cw4-87c7-c6xx; the46-test suite passes with this version.
+Configure `AZURE_OPENAI_ENDPOINT` to your existing Azure `/openai/v1/` endpoint. This hackathon build calls deployment `importforge-astra` through the official OpenAI SDK Responses API. Set `AZURE_KEYS_ROTATED=true` only after confirming the existing credential configuration. No key creation is required by this repository. The public source replaces the developer's resource-specific endpoint with environment configuration; inference logic is otherwise unchanged. The publication snapshot also pins `csv-parse`7.0.3 to address GHSA-8cw4-87c7-c6xx; the isolated51-test suite passes with this version.
 
 Set `MONGODB_URI` and the exact `MONGODB_EXPECTED_HOST` for your authorized Sandbox. With a standard non-SRV URI, use `MONGODB_EXPECTED_HOSTS` as the sorted host:port list. TLS verification stays enabled. The runtime uses database `importforge`; grant only the required scoped database permissions and network access. Existing history is read from Atlas; a new database will not contain the screenshots' runs.
 
@@ -106,10 +108,10 @@ The deployment mode `PUBLIC_DEMO_READ_ONLY=true` requires one exact `PUBLIC_ORIG
 
 Every non-GET/HEAD request is denied before application routes, including generation, resume, continue, cancel, replay and reconcile. The UI closes these actions. Atlas proof, version history, recorded decisions and synthetic CSV downloads remain available. API reads are bounded to120 requests per minute per process. The cloud viewer has no model credential and creates no independent spending ledger. The budget shown is an explicitly dated record from the local operator ledger, not real-time Azure billing.
 
-Hosting uses the authorized FreeF1/LinuxFree plan without Always On, autoscaling, custom certificates or new monitoring services. A separate$10 monthly Azure hosting budget is an alert, not a hard spending stop. The existing model cap$200 is unchanged. Atlas runtime credentials are reused, not regenerated; their authorized expiry is October18,2026,15:00PDT. Network access adds only the current App Service outbound IPs as individual temporary/32 entries. The existing database role is scoped readWrite on `importforge`/Cluster0; this viewer never uses write routes. No public operator authentication or new database user is claimed.
+The live viewer uses one authorized Linux B1 instance with Always On, without autoscaling, custom certificates or new monitoring services. Verified Azure retail price on October11 is$0.017/hour (about$2.85 through October18,2026,15:00PDT, not a billing guarantee). A one-off local Codex automation is scheduled to disable Always On and downgrade this same plan to FreeF1 at that time. Execution requires an available Mac, Codex and valid existing Azure authorization; it is not a platform-enforced spending stop. After that time Atlas access also expires, and Free hosting may cold-start or stop on quota. A separate$10 monthly Azure hosting budget is an alert, not a hard spending stop. The existing model cap$200 is unchanged. Atlas runtime credentials are reused, not regenerated; their authorized expiry is October18,2026,15:00PDT. Network access adds only the current App Service outbound IPs as individual temporary/32 entries. The existing database role is scoped readWrite on `importforge`/Cluster0; this viewer never uses write routes. No public operator authentication or new database user is claimed.
 
 ### Portable deployment data
 
 `data/warehouse/` contains the four immutable synthetic reference/regression CSVs required by the runtime and tests. They are loaded relative to this repository, never a sibling workspace. `expected-private-to-evaluator.csv` means synthetic oracle answers are not offered to importer tools; it is not customer data or a secret. Relocating the unchanged files preserves the Atlas reference hash.
 
-Deploy a source ZIP through the official Azure CLI with `SCM_DO_BUILD_DURING_DEPLOYMENT=true` and `ENABLE_ORYX_BUILD=true`. Azure Oryx installs dependencies and creates its own runtime metadata; do not hand-author or depend on Oryx internal compression metadata. Startup is `npm start`, with platform port8080. Never package `.env`, `state`, CLI caches or secrets.
+Deploy a source ZIP through the official Azure CLI with `SCM_DO_BUILD_DURING_DEPLOYMENT=true` and `ENABLE_ORYX_BUILD=true`. Use standard platform dependency installation and runtime metadata; do not hand-author Oryx internal compression metadata. In this deployment OneDeploy did not reliably install source dependencies, so the verified startup is `npm ci --omit=dev --ignore-scripts && npm start`, with platform port8080. An initial startup can take several minutes; Always On keeps the B1 viewer warm. Never package `.env`, `state`, CLI caches or secrets.
