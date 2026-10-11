@@ -1,0 +1,20 @@
+{
+  "name": "importforge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "csv-parse": "7.0.3",
+    "express": "^5.1.0",
+    "mongodb": "^6.20.0",
+    "openai": "^6.0.0"
+  },
+  "description": "A self-improving warehouse import agent with bounded feedback revision and persistent MongoDB Atlas memory",
+  "engines": {
+    "node": ">=22.16.0"
+  }
+}
