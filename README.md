@@ -112,4 +112,4 @@ Hosting uses the authorized FreeF1/LinuxFree plan without Always On, autoscaling
 
 `data/warehouse/` contains the four immutable synthetic reference/regression CSVs required by the runtime and tests. They are loaded relative to this repository, never a sibling workspace. `expected-private-to-evaluator.csv` means synthetic oracle answers are not offered to importer tools; it is not customer data or a secret. Relocating the unchanged files preserves the Atlas reference hash.
 
-The deployed Node runtime uses the standard Oryx manifest and gzip dependency bundle with `compressedNodeModulesFile="node_modules.tar.gz"`. Remote build is disabled for this prebuilt artifact; startup is `npm start`, with platform port8080. Never package `.env`, `state`, CLI caches or secrets.
+Deploy a source ZIP through the official Azure CLI with `SCM_DO_BUILD_DURING_DEPLOYMENT=true` and `ENABLE_ORYX_BUILD=true`. Azure Oryx installs dependencies and creates its own runtime metadata; do not hand-author or depend on Oryx internal compression metadata. Startup is `npm start`, with platform port8080. Never package `.env`, `state`, CLI caches or secrets.
